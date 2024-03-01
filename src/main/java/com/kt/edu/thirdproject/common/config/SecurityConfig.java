@@ -1,5 +1,6 @@
 package com.kt.edu.thirdproject.common.config;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +16,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -24,10 +26,10 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.Collections;
 
-import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
 @EnableWebSecurity
+//@AllArgsConstructor
 public class SecurityConfig {
 
     @Autowired
@@ -35,6 +37,9 @@ public class SecurityConfig {
 
     @Autowired
     private JwtRequestFilter jwtRequestFilter;
+
+    @Autowired
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     //@Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
@@ -69,7 +74,11 @@ public class SecurityConfig {
         http
                 .cors(corsConfigurer -> corsConfigurer.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
-                .formLogin(Customizer.withDefaults());
+                .exceptionHandling( exception -> exception
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                //.exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                //.formLogin(formLogin -> formLogin.disable());
+               .formLogin(Customizer.withDefaults());
         http
                 .authorizeHttpRequests(
                         authorize -> authorize
@@ -81,7 +90,7 @@ public class SecurityConfig {
                                         "/swagger-ui/**",
                                         "/api/login",
                                         "/login",
-                                        "/api/v1/**",
+                                        "*",
                                         "/h2-console/*"
                                         ).permitAll()
                                 .anyRequest().authenticated()
@@ -99,11 +108,12 @@ public class SecurityConfig {
                                 )
         );
 
-
         // Add a filter to validate the tokens with every request
-        http.sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
-                .authenticationProvider(authenticationProvider()).addFilterBefore(
-                        jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+        http.sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        //http.sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+              //  .authenticationProvider(authenticationProvider()).addFilterBefore(
+               //         jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+        .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

@@ -4,8 +4,10 @@ package com.kt.edu.thirdproject.common.controller;
 import com.kt.edu.thirdproject.common.domain.JwtRequest;
 import com.kt.edu.thirdproject.common.domain.JwtResponse;
 import com.kt.edu.thirdproject.common.service.JwtUserDetailsService;
-import com.kt.edu.thirdproject.common.util.JwtTokenUtil;
 
+import com.kt.edu.thirdproject.common.util.JwtTokenUtil;
+import com.kt.edu.thirdproject.common.util.RsaUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,7 +32,12 @@ public class JwtAuthenticationController {
 
     @PostMapping("/api/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
-        authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+
+        // RSA 암호화
+        authenticate(authenticationRequest.getUsername(), RsaUtil.passwordDescryptRSA(authenticationRequest.getPassword()));
+
+        // RSA 암호화 안하는 경우
+        //authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
 
         final UserDetails userDetails = userDetailsService
                 .loadUserByUsername(authenticationRequest.getUsername());

@@ -32,7 +32,7 @@ jasypt:
     bean: jasyptStringEncryptor
 
 jwt:
-  secret: edujwt
+  secret: CloudNativeKtEduSecretKey20240228CloudNativeKtEduSecretKey20240228CloudNativeKtEduSecretKey20240228
 
 # app
 app-info:

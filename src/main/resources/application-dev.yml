@@ -51,14 +51,20 @@ management:
     web:
       exposure:
         include: health,prometheus,loggers,metrics,caches,beans
-#        include: "*"
+  #        include: "*"
+  endpoint:
+    health:
+      probes:
+        enabled: true
 
 springdoc:
+  show-actuator: true  # actuator swagger 노출
   swagger-ui:
-    operations-sorter: alpha
-    tags-sorter: alpha
+    groups-order: DESC
+    #operations-sorter: alpha
+    #tags-sorter: alpha
     disable-swagger-default-url: true
-    doc-expansion: none
+    #doc-expansion: none
 
 logging:
   level:
